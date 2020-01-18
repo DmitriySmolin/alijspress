@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const cookieQuery = get => {
 
         if (get) {
-            goodsBasket = JSON.parse(getCookie('goodsBasket'))
+            goodsBasket = {...JSON.parse(getCookie('goodsBasket'))}
         } else {
             document.cookie = `goodsBasket=${JSON.stringify(goodsBasket)}; max-age=86400e3`
         }
