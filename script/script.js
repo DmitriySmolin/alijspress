@@ -84,20 +84,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 title,
                 price,
                 imgMin
-            }) => {
-                goodsWrapper.append(createCardGoods(id, title, price, imgMin))
+            } = {}) => {
+                goodsWrapper.append(createCardGoods(id, title, price, imgMin));
             })
         } else {
             goodsWrapper.textContent = '❌ Извините, мы не нашли товаров по вашему запросу!';
         }
-        items.forEach(({
-            id,
-            title,
-            price,
-            imgMin
-        } = {}) => {
-            goodsWrapper.append(createCardGoods(id, title, price, imgMin));
-        });
+
     }
 
     //ф-ция очищает товары
@@ -166,7 +159,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const cookieQuery = get => {
 
         if (get) {
-            goodsBasket = {...JSON.parse(getCookie('goodsBasket'))}
+            goodsBasket = {
+                ...JSON.parse(getCookie('goodsBasket'))
+            }
         } else {
             document.cookie = `goodsBasket=${JSON.stringify(goodsBasket)}; max-age=86400e3`
         }
@@ -195,7 +190,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const storageQuery = (get) => {
         if (get) {
             if (localStorage.getItem('wishlist')) {
-                const wishlistStorage = JSON.parse(localStorage.getItem('wishlist'))
+                const wishlistStorage = JSON.parse(localStorage.getItem('wishlist'));
                 wishlistStorage.forEach(id => wishlist.push(id));
             }
         } else {
@@ -277,6 +272,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 imgMin
             }) => {
                 cartWrapper.append(createCartGoods(id, title, price, imgMin))
+
             })
         } else {
             cartsWrapper.innerHTML = '<div id="cart-empty">Ваша корзина пока пуста </div>';
