@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const cartWrapper = document.querySelector('.cart-wrapper');
 
     let wishlist = [];
-    let goodsBasket = {};
+    goodsBasket = {};
     //Functions
 
     //ф-ция показывает прелоадер
@@ -50,7 +50,23 @@ document.addEventListener('DOMContentLoaded', function () {
         return card;
     }
 
-    const showCardBasket = (goods) => goods.filter(item => goodsBasket.hasOwnProperty(item.id))
+    const calcTotalPrice = (goods) => {
+        //let sum = 0;
+
+        // for (const item of goods) {
+        //     sum += item.price * goodsBasket[item.id]
+        // }
+        let sum = goods.reduce((acc, item) => {
+            return acc += item.price * goodsBasket[item.id];
+        }, 0)
+        cart.querySelector('.cart-total>span').textContent = sum.toFixed(2);
+    }
+    const showCardBasket = (goods) => {
+        const basketGoods = goods.filter(item => goodsBasket.hasOwnProperty(item.id));
+        calcTotalPrice(basketGoods);
+        return basketGoods;
+    }
+
 
     //ф-ция открывает корзину
     const openCart = (e) => {
@@ -159,13 +175,15 @@ document.addEventListener('DOMContentLoaded', function () {
     const cookieQuery = get => {
 
         if (get) {
-            goodsBasket = {
-                ...JSON.parse(getCookie('goodsBasket'))
+            if (getCookie('goodsBasket')) {
+                Object.assign(goodsBasket, JSON.parse(getCookie('goodsBasket')))
+                // goodsBasket = JSON.parse(getCookie('goodsBasket'));
             }
+            checkCount();
         } else {
             document.cookie = `goodsBasket=${JSON.stringify(goodsBasket)}; max-age=86400e3`
         }
-        checkCount();
+
     }
 
 
@@ -190,13 +208,18 @@ document.addEventListener('DOMContentLoaded', function () {
     const storageQuery = (get) => {
         if (get) {
             if (localStorage.getItem('wishlist')) {
-                const wishlistStorage = JSON.parse(localStorage.getItem('wishlist'));
-                wishlistStorage.forEach(id => wishlist.push(id));
+                // wishlist.splice(0, 0, ...JSON.parse(localStorage.getItem('wishlist')));
+
+                wishlist.push(...JSON.parse(localStorage.getItem('wishlist')));
+
+                // const wishlistStorage = JSON.parse(localStorage.getItem('wishlist'));
+                // wishlistStorage.forEach(id => wishlist.push(id));
             }
+            checkCount();
         } else {
             localStorage.setItem('wishlist', JSON.stringify(wishlist));
         }
-        checkCount();
+
     }
 
     const toggleWishlist = (id, target) => {
@@ -236,26 +259,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-    const createCartGoods = (id, title, price, img) => {
-        const card = document.createElement('div');
-        card.className = 'card-wrapper col-12 col-md-6 col-lg-4 col-xl-3 pb-3';
-        card.innerHTML = `
-    <div class="goods-img-wrapper">
-        <img class="goods-img" src="${img}" alt="">
-    </div>
-    <div class="goods-description">
-        <h2 class="goods-title">${title}</h2>
-        <p class="goods-price">${price} ₽</p>
-    </div>
-    <div class="goods-price-count">
-        <div class="goods-trigger">
-            <button class="goods-add-wishlist ${wishlist.includes(id)  ? 'active' : ''}" data-goods-id="${id}" ></button>
-            <button class="goods-delete" data-goods-id="${id}"></button>
-        </div>
-        <div class="goods-count">1</div>
-    </div>`;
-        return card;
-    }
+
 
     const renderBasket = items => {
 
@@ -288,11 +292,52 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    const createCartGoods = (id, title, price, img) => {
+        const card = document.createElement('div');
+        card.className = 'card-wrapper col-12 col-md-6 col-lg-4 col-xl-3 pb-3';
+        card.innerHTML = `
+    <div class="goods-img-wrapper">
+        <img class="goods-img" src="${img}" alt="">
+    </div>
+    <div class="goods-description">
+        <h2 class="goods-title">${title}</h2>
+        <p class="goods-price">${price} ₽</p>
+    </div>
+    <div class="goods-price-count">
+        <div class="goods-trigger">
+            <button class="goods-add-wishlist ${wishlist.includes(id)  ? 'active' : ''}" data-goods-id="${id}" ></button>
+            <button class="goods-delete" data-goods-id="${id}"></button>
+        </div>
+        <div class="goods-count" >1</div>
+    </div>`;
+        // ${gooodsBasket[id]}
+        return card;
+    }
+
+    const removeGoods = (id) => {
+        delete goodsBasket[id];
+        checkCount();
+        cookieQuery();
+        getGoods(renderBasket, showCardBasket);
+    }
+
+    const handlerBasket = (e) => {
+        const target = e.target;
+
+        if (target.classList.contains('goods-add-wishlist')) {
+            toggleWishlist(target.dataset.goodsId, target);
+        }
+        if (target.classList.contains('goods-add-wishlist')) {
+            removeGoods(target.dataset.goodsId);
+        }
+    }
+
     //Events
     cartBtn.addEventListener('click', openCart);
     cart.addEventListener('click', closeCart);
     category.addEventListener('click', chooseCategory);
     search.addEventListener('submit', searchGoods);
     goodsWrapper.addEventListener('click', handlerGoods);
+    cartWrapper.addEventListener('click', handlerBasket);
     wishlistBtn.addEventListener('click', showWishlist)
 });
